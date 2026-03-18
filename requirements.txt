@@ -1,0 +1,2 @@
+nbgitpuller
+jupyter-server-proxy
