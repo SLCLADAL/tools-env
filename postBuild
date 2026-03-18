@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-echo "=== Downloading udpipe language models ==="
-
 mkdir -p ${HOME}/udpipe-models
 
 cat > /tmp/download_models.R << 'EOF'
@@ -40,3 +38,12 @@ EOF
 Rscript --vanilla /tmp/download_models.R
 
 echo "=== udpipe model download complete ==="
+```
+
+---
+
+## Step 5 — `apt.txt`
+
+Copy the `apt.txt` from the original environment repo. Go to:
+```
+https://github.com/SLCLADAL/interactive-notebooks-environment/blob/main/apt.txt
