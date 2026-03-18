@@ -16,7 +16,7 @@ models <- c(
   "italian-isdt", "italian-partut", "italian-postwita",
   "italian-twittiro", "italian-vit",
   "japanese-gsd",
-  "portuguese-bosque", "portuguese-br", "portuguese-gsd",
+  "portuguese-bosque", "portuguese-gsd",
   "russian-gsd", "russian-syntagrus", "russian-taiga",
   "spanish-ancora", "spanish-gsd"
 )
@@ -38,12 +38,3 @@ EOF
 Rscript --vanilla /tmp/download_models.R
 
 echo "=== udpipe model download complete ==="
-```
-
----
-
-## Step 5 — `apt.txt`
-
-Copy the `apt.txt` from the original environment repo. Go to:
-```
-https://github.com/SLCLADAL/interactive-notebooks-environment/blob/main/apt.txt
