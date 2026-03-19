@@ -9,10 +9,11 @@ set -e
 
 # ── 1. Configure Java for R (required by topicmodels) ───────
 # Java is installed via apt.txt (default-jre, default-jdk).
-# R CMD javareconf writes the Java paths into R's configuration
-# so that packages linking against rJava/Java compile correctly.
-echo "=== Configuring Java for R ==="
-R CMD javareconf
+# The -e flag writes Java config to ~/.R/Makevars (user-writable)
+# rather than /opt/R/.../etc/Makeconf which is read-only for jovyan.
+echo "=== Configuring Java for R (user-level) ==="
+mkdir -p "${HOME}/.R"
+R CMD javareconf -e 2>&1 || echo "WARN: javareconf returned non-zero — continuing"
 echo "=== Java configuration complete ==="
 
 # ── 2. Set up Jupyter config directory ──────────────────────
@@ -96,7 +97,7 @@ Rscript --vanilla -e "
     })
   }
   cat('Pre-warming complete.\n')
-"
+" || echo "WARN: package pre-warming exited non-zero — continuing"
 
 echo "=== Package pre-warming complete ==="
 
@@ -114,7 +115,7 @@ Rscript --vanilla -e "
   }, error = function(e) {
     cat('textstem WARN:', conditionMessage(e), '\n')
   })
-"
+" || echo "WARN: textstem pre-warming exited non-zero — continuing"
 
 echo "=== textstem pre-warming complete ==="
 echo "=== postBuild finished ==="
