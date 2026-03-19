@@ -1,11 +1,26 @@
 #!/bin/bash
 set -e
 
-# Copy jupyter server config to correct location
-mkdir -p ~/.jupyter
-echo "=== Jupyter server config installed ==="
+# ============================================================
+#  postBuild — tools-env Binder build script
+#  Runs ONCE at image build time, not at session startup.
+#  Order matters: Java → R Java config → udpipe models → warm-up
+# ============================================================
 
-mkdir -p ${HOME}/udpipe-models
+# ── 1. Configure Java for R (required by topicmodels) ───────
+# Java is installed via apt.txt (default-jre, default-jdk).
+# R CMD javareconf writes the Java paths into R's configuration
+# so that packages linking against rJava/Java compile correctly.
+echo "=== Configuring Java for R ==="
+R CMD javareconf
+echo "=== Java configuration complete ==="
+
+# ── 2. Set up Jupyter config directory ──────────────────────
+mkdir -p ~/.jupyter
+echo "=== Jupyter config directory ready ==="
+
+# ── 3. Download udpipe language models ──────────────────────
+mkdir -p "${HOME}/udpipe-models"
 
 cat > /tmp/download_models.R << 'EOF'
 library(udpipe)
@@ -40,5 +55,66 @@ cat("Done. Models:", length(list.files(model_dir, pattern = "\\.udpipe$")), "\n"
 EOF
 
 Rscript --vanilla /tmp/download_models.R
-
 echo "=== udpipe model download complete ==="
+
+# ── 4. Pre-warm heavy R packages ────────────────────────────
+# Forces R to load and bytecode-compile the slowest packages
+# at image build time rather than at the first user session.
+# This typically saves 5-15 seconds off startup time per tool.
+echo "=== Pre-warming R packages ==="
+
+Rscript --vanilla -e "
+  pkgs <- c(
+    # Topic modelling (heaviest — Java-backed)
+    'topicmodels',
+    'seededlda',
+    'tidytext',
+    'SnowballC',
+    # NLP / corpus
+    'quanteda',
+    'quanteda.textstats',
+    'quanteda.textplots',
+    'udpipe',
+    # Networks
+    'visNetwork',
+    # Sentiment
+    'stringi',
+    # General
+    'shiny',
+    'DT',
+    'ggplot2',
+    'dplyr',
+    'writexl'
+  )
+  for (pkg in pkgs) {
+    cat('  Loading', pkg, '...')
+    tryCatch({
+      library(pkg, character.only = TRUE)
+      cat('OK\n')
+    }, error = function(e) {
+      cat('WARN:', conditionMessage(e), '\n')
+    })
+  }
+  cat('Pre-warming complete.\n')
+"
+
+echo "=== Package pre-warming complete ==="
+
+# ── 5. Pre-warm textstem (lazy-loaded in WordWebber) ────────
+# textstem pulls in koRpus/sylly — loading it once here caches
+# its internal lexicon data so the first user click is instant.
+echo "=== Pre-warming textstem ==="
+
+Rscript --vanilla -e "
+  tryCatch({
+    library(textstem)
+    # Trigger the lexicon load by lemmatising a test word
+    textstem::lemmatize_words('running')
+    cat('textstem pre-warmed OK\n')
+  }, error = function(e) {
+    cat('textstem WARN:', conditionMessage(e), '\n')
+  })
+"
+
+echo "=== textstem pre-warming complete ==="
+echo "=== postBuild finished ==="
