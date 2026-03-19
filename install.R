@@ -25,6 +25,7 @@ install.packages("udpipe")
 # ── Fast string processing ─────────────────────────────────
 install.packages("stringi")
 
-install.packages("textstem")
-install.packages("koRpus")
-install.packages("sylly")
+install.packages("textstem")   # lemmatisation
+install.packages("koRpus")     # textstem dependency
+install.packages("sylly")      # koRpus dependency
+install.packages("readr")      # explicit — used for CSV download
