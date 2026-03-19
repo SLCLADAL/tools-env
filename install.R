@@ -24,3 +24,7 @@ install.packages("udpipe")
 
 # ── Fast string processing ─────────────────────────────────
 install.packages("stringi")
+
+install.packages("textstem")
+install.packages("koRpus")
+install.packages("sylly")
