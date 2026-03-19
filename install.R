@@ -29,3 +29,8 @@ install.packages("textstem")   # lemmatisation
 install.packages("koRpus")     # textstem dependency
 install.packages("sylly")      # koRpus dependency
 install.packages("readr")      # explicit — used for CSV download
+
+install.packages("topicmodels")   # unsupervised LDA
+install.packages("seededlda")     # seeded/semi-supervised LDA
+install.packages("SnowballC")     # stemming
+install.packages("tidytext")      # tidy() for LDA beta/gamma matrices
