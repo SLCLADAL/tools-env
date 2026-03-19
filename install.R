@@ -34,3 +34,5 @@ install.packages("topicmodels")   # unsupervised LDA
 install.packages("seededlda")     # seeded/semi-supervised LDA
 install.packages("SnowballC")     # stemming
 install.packages("tidytext")      # tidy() for LDA beta/gamma matrices
+
+install.packages("reshape2")      # for LDA data reformatting
