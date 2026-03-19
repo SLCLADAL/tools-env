@@ -1,3 +1,5 @@
+c.SingleUserLabApp.default_url = '/lab'
+
 c.ServerProxy.servers = {
     "wordfinder": {
         "command": ["R", "-e", 
