@@ -3,7 +3,6 @@ set -e
 
 # Copy jupyter server config to correct location
 mkdir -p ~/.jupyter
-cp ~/jupyter_server_config.py ~/.jupyter/jupyter_server_config.py
 echo "=== Jupyter server config installed ==="
 
 mkdir -p ${HOME}/udpipe-models
