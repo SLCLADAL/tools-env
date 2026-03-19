@@ -6,6 +6,7 @@ c.ServerProxy.servers = {
         "timeout": 120,
         "launcher_entry": {
             "enabled": False
-        }
+        },
+        "managed": True
     }
 }
