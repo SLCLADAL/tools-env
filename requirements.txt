@@ -1,4 +1,2 @@
 nbgitpuller
-jupyter-server-proxy==3.2.3
-jupyter-shiny-proxy
-voila
+jupyter-server-proxy>=4.0
