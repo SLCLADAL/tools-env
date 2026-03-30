@@ -1,2 +1,3 @@
 nbgitpuller
 jupyter-server-proxy>=4.0
+voila>=0.5
