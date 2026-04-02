@@ -1,50 +1,95 @@
-# ── Core Shiny infrastructure ──────────────────────────────
-install.packages("shiny")
-install.packages("DT")
-install.packages("zip")
+# ============================================================
+# SLCLADAL/tools-env — install.R
+# Runs during repo2docker image build (internet available).
+# All packages and udpipe models are baked into the image.
+# ============================================================
 
-# ── Data manipulation & output ─────────────────────────────
-install.packages("data.table")
-install.packages("tidyverse")    # includes readr, ggplot2,
-                                 # stringr, stringi, tibble,
-                                 # dplyr, tidyr, purrr, readr
-install.packages("writexl")
+# ── CRAN packages ────────────────────────────────────────────
+install.packages(c(
+  # Core Shiny
+  "shiny",
+  
+  # Data wrangling
+  "tidyverse",
+  "data.table",
+  "stringi",
+  "dplyr",
+  "ggplot2",
+  "tibble",
+  "readr",
+  
+  # Output / download
+  "writexl",
+  "DT",
+  "zip",
+  
+  # Text analytics
+  "quanteda",
+  "quanteda.textplots",
+  "quanteda.textstats",
+  "udpipe",
+  "tidytext",
+  "topicmodels",
+  "SnowballC",
+  
+  # Network visualisation
+  "visNetwork",
+  
+  # Topic modelling
+  "seededlda",
+  
+  # Lemmatisation (WordWebber optional)
+  "textstem",
+  
+  # Utilities
+  "remotes"
+), repos = "https://cloud.r-project.org", dependencies = TRUE)
 
-# ── Text / corpus analysis ─────────────────────────────────
-install.packages("quanteda")
-install.packages("quanteda.textstats")
-install.packages("quanteda.textplots")
+# ── udpipe models ────────────────────────────────────────────
+# Pre-download during build so models are baked into the image.
+# Without this the POSTagger tries to download at runtime, but
+# ARDC Binder blocks outbound internet → model load fails.
 
-# ── Network analysis ───────────────────────────────────────
-install.packages("igraph")
-install.packages("visNetwork")
+message("Downloading udpipe models...")
 
-# ── POS tagging ────────────────────────────────────────────
-install.packages("udpipe")
-
-# ── Fast string processing ─────────────────────────────────
-install.packages("stringi")
-
-install.packages("textstem")   # lemmatisation
-install.packages("koRpus")     # textstem dependency
-install.packages("sylly")      # koRpus dependency
-install.packages("readr")      # explicit — used for CSV download
-
-install.packages("topicmodels")   # unsupervised LDA
-install.packages("seededlda")     # seeded/semi-supervised LDA
-install.packages("SnowballC")     # stemming
-install.packages("tidytext")      # tidy() for LDA beta/gamma matrices
-
-install.packages("reshape2")      # for LDA data reformatting
-
-# Pre-download udpipe models so they are baked into the Binder image
 model_dir <- "/home/jovyan/udpipe-models"
 dir.create(model_dir, recursive = TRUE, showWarnings = FALSE)
-for (lang in c("english-ewt", "german-gsd", "french-gsd", 
-               "spanish-ancora", "italian-isdt", "portuguese-bosque",
-               "dutch-alpino", "russian-syntagrus", "chinese-gsd")) {
-  tryCatch(
-    udpipe::udpipe_download_model(language = lang, model_dir = model_dir),
-    error = function(e) message("Could not download: ", lang)
-  )
+
+bundled_langs <- c(
+  "arabic-padt",
+  "chinese-gsd",        "chinese-gsdsimp",
+  "dutch-alpino",       "dutch-lassysmall",
+  "english-ewt",        "english-gum",
+  "english-lines",      "english-partut",
+  "french-gsd",         "french-partut",
+  "french-sequoia",     "french-spoken",
+  "german-gsd",         "german-hdt",
+  "italian-isdt",       "italian-partut",
+  "italian-postwita",   "italian-twittiro",   "italian-vit",
+  "japanese-gsd",
+  "portuguese-bosque",  "portuguese-br",      "portuguese-gsd",
+  "russian-gsd",        "russian-syntagrus",  "russian-taiga",
+  "spanish-ancora",     "spanish-gsd"
+)
+
+for (lang in bundled_langs) {
+  tryCatch({
+    existing <- list.files(model_dir,
+                           pattern    = paste0("^", lang, ".*[.]udpipe$"),
+                           full.names = TRUE)
+    if (length(existing) > 0) {
+      message("  Already present: ", lang)
+    } else {
+      message("  Downloading: ", lang, " ...")
+      udpipe::udpipe_download_model(language  = lang,
+                                    model_dir = model_dir)
+      message("  Done: ", lang)
+    }
+  }, error = function(e) {
+    message("  WARNING — could not download '", lang,
+            "': ", conditionMessage(e))
+  })
 }
+
+n_models <- length(list.files(model_dir, pattern = "[.]udpipe$"))
+message("udpipe downloads complete. Models in image: ", n_models)
