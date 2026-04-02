@@ -36,3 +36,15 @@ install.packages("SnowballC")     # stemming
 install.packages("tidytext")      # tidy() for LDA beta/gamma matrices
 
 install.packages("reshape2")      # for LDA data reformatting
+
+# Pre-download udpipe models so they are baked into the Binder image
+model_dir <- "/home/jovyan/udpipe-models"
+dir.create(model_dir, recursive = TRUE, showWarnings = FALSE)
+for (lang in c("english-ewt", "german-gsd", "french-gsd", 
+               "spanish-ancora", "italian-isdt", "portuguese-bosque",
+               "dutch-alpino", "russian-syntagrus", "chinese-gsd")) {
+  tryCatch(
+    udpipe::udpipe_download_model(language = lang, model_dir = model_dir),
+    error = function(e) message("Could not download: ", lang)
+  )
+}
