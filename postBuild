@@ -36,7 +36,7 @@ models <- c(
   "italian-isdt", "italian-partut", "italian-postwita",
   "italian-twittiro", "italian-vit",
   "japanese-gsd",
-  "portuguese-bosque", "portuguese-gsd",
+  "portuguese-bosque", "portuguese-br", "portuguese-gsd",
   "russian-gsd", "russian-syntagrus", "russian-taiga",
   "spanish-ancora", "spanish-gsd"
 )
