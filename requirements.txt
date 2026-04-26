@@ -1,3 +1,3 @@
 nbgitpuller
-# Temporarily pin as jupyter_shiny_proxy doesn't work with 4.5.0
-jupyter-server-proxy==4.4.0
+# Earlier versions won't work with jupyter-server-proxy after 4.4.0
+jupyter-shiny-proxy>=1.4.0
